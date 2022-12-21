@@ -2,7 +2,6 @@ import requests
 import ssl
 import json
 from types import SimpleNamespace
-import psycopg2
 
 url = 'https://www.eurisportal.eu/visuris/api/Berths_v2/GetCompactBerths'
 
@@ -22,19 +21,5 @@ data = res.json()
 d = json.dumps(data)
 x = json.loads(d, object_hook=lambda d: SimpleNamespace(**d))
 array=x.items
+print(array)
 
-conn = psycopg2.connect("dbname='viadonau' user='viadonau' host='localhost' password='viadonau'")
-cur = conn.cursor()	
-#get current timestamp
-cur.execute("SELECT NOW()")
-timestamp = cur.fetchone() 
-cur.execute("INSERT INTO berthMessage (timestamp) VALUES (%s)", (timestamp))
-conn.commit()
-for i in array:
-    cur.execute("SELECT MAX(messageId) FROM berthmessage")
-    messageId = cur.fetchone()
-    cur.execute("INSERT INTO berth(messageId, locode) VALUES ({0},'{1}')".format(messageId[0],i.locode))
-    
-conn.commit()
-cur.close()
-conn.close()
